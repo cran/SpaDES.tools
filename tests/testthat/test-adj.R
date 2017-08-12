@@ -1,0 +1,161 @@
+test_that("adj.R results not identical to adjacent", {
+  a <- raster::raster(raster::extent(0, 1e1, 0, 1e1), res = 1)
+  sam <- sample(1:length(a), 4)
+
+  for (incl in c(TRUE, FALSE)) {
+    for (ids in list(NULL, seq_len(length(sam)))) {
+      for (targs in list(NULL, sam + 1)) {
+        for (sortTF in c(TRUE, FALSE)) {
+          for (ma in c(TRUE, FALSE)) {
+            for (dirs in list(4, 8, "bishop")) {
+              for (prs in c(TRUE, FALSE)) {
+                for (tor in c(TRUE, FALSE)) {
+                  adjDT <- adj.raw(a, sam, directions = dirs, sort = sortTF,
+                                   match.adjacent = ma, include = incl, target = targs,
+                                   cutoff.for.data.table = 2, id = ids, pairs = prs, torus = tor)
+                  adjMat <- adj.raw(a, sam, directions = dirs, sort = sortTF,
+                                    match.adjacent = ma, include = incl,
+                                    target = targs, id = ids, pairs = prs, torus = tor)
+                  expect_equivalent(adjMat, adjDT)
+                  if (!tor) {
+                    adj2 <- tryCatch(
+                      raster::adjacent(a, sam, directions = dirs, sorted = sortTF,
+                                       include = incl, id = !is.null(ids),
+                                       pairs = prs, target = targs),
+                      error = function(x) FALSE
+                    )
+                    if (isTRUE(adj2)) {
+                      if (!prs) {
+                        if (ma) {
+                          expect_equivalent(adjDT, adj2,
+                                            info = paste0("ma=", ma,
+                                                          ", dirs=", dirs,
+                                                          ", sortTF=", sortTF,
+                                                          ", incl=", incl,
+                                                          ", is.null(ids)=", is.null(ids),
+                                                          ", prs=", prs))
+                        } else {
+                          expect_equivalent(unique(sort(adjDT[, "to"])), sort(adj2))
+                        }
+                      } else {
+                        colOrd <- if (is.null(ids)) 1:2 else c(2, 3, 1)
+                        if (ma) {
+                          if (!sortTF) {
+                            expect_equivalent(adjDT, adj2[, colOrd])
+                          } else {
+                            expect_equivalent(adjDT, adj2[order(adj2[, "from"],
+                                                                adj2[, "to"]), colOrd])
+                          }
+                        } else {
+                          if (!sortTF) {
+                            # if match.adjacent is FALSE, and sort is FALSE,
+                            # then they mostly don't match
+                             if (sum((adjDT - adj2[, colOrd]) ^ 2) == 0) {
+                               expect_equivalent(adjDT, adj2[, colOrd])
+                             } else {
+                               # sum of squared difference should be positive
+                               expect_gt(sum((adjDT - adj2[, colOrd]) ^ 2), 0)
+                             }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+})
+
+test_that("adj benchmarking", {
+  skip("benchmarking only")
+
+  a <- raster::raster(raster::extent(0, 1e1, 0, 1e1), res = 1)
+  sam <- sample(1:length(a), 4)
+  dirs <- "bishop"
+  sortTF <- FALSE
+  ma <- FALSE
+  incl <- FALSE
+  ids <- seq_len(length(sam))
+  prs <- FALSE
+  tor <- FALSE
+
+  microbenchmark::microbenchmark(times = 1e3, {
+    adjDT <- adj.raw(a, sam, directions = dirs, sort = sortTF, match.adjacent = ma,
+                     include = incl, cutoff.for.data.table = 2, id = ids,
+                     pairs = prs, torus = tor)
+  })
+
+  ## Unit: milliseconds
+  ##     min       lq     mean   median       uq      max neval
+  ## 1.31649 1.399192 1.895637 1.455207 1.705074 6.158969  1000
+
+  microbenchmark::microbenchmark(times = 1e3, {
+    adjDT <- adj.raw(a, sam, directions = dirs, sort = sortTF, match.adjacent = ma,
+                     include = incl, cutoff.for.data.table = 5, id = ids,
+                     pairs = prs, torus = tor)
+  })
+
+  ## Unit: microseconds
+  ##     min     lq     mean  median     uq      max neval
+  ##  65.986 69.212 111.4826 73.7575 87.981 15844.22  1000
+})
+
+test_that("errors in adj are not correct", {
+  a <- raster::raster(raster::extent(0, 1e1, 0, 1e1), res = 1)
+  sam <- sample(1:length(a), 4)
+  expect_error(adj.raw(a, sam, directions = 5), "directions must be 4 or 8 or \'bishop\'")
+})
+
+test_that("adj.R: torus does not work as expected", {
+  a <- raster::raster(raster::extent(0, 4, 0, 4), res = 1)
+
+  # test data.table and matrix
+  for (i in c(100, 1)) {
+    # a corner
+    s <- 4
+    newCells <- adj(a, s, directions = 4, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(1, 3, 8, 16))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+
+    # a corner
+    s <- 1
+    newCells <- adj(a, s, directions = 4, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(2, 4, 5, 13))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+
+    # a side
+    s <- 12
+    newCells <- adj(a, s, directions = 4, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(8, 9, 11, 16))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+
+    # a corner
+    s <- 16
+    newCells <- adj(a, s, directions = 4, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(4, 12, 13, 15))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+
+    # a corner with 8 neighbours
+    s <- 16
+    newCells <- adj(a, s, directions = 8, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(1, 3, 4, 9, 11, 12, 13, 15))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+
+    # a corner with 8 neighbours
+    s <- 1
+    newCells <- adj(a, s, directions = 8, sort = TRUE, cutoff.for.data.table = i,
+                    match.adjacent = TRUE, pairs = FALSE, torus = TRUE)
+    expect_identical(sort(as.numeric(newCells)), c(2, 4, 5, 6, 8, 13, 14, 16))
+    expect_equal(adj(a, s, directions = "bishop"), raster::adjacent(a, s, directions = "bishop"))
+  }
+})
