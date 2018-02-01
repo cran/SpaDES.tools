@@ -110,7 +110,7 @@ You must know how to use SELES for these to be useful:
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://spades.predictiveecology.org}
+  \item \url{http://spades-tools.predictiveecology.org}
   \item \url{https://github.com/PredictiveEcology/SpaDES.tools}
   \item Report bugs at \url{https://github.com/PredictiveEcology/SpaDES.tools/issues}
 }
@@ -128,6 +128,7 @@ Other contributors:
 \itemize{
   \item Yong Luo \email{yluo1@lakeheadu.ca} [contributor]
   \item Steve Cumming \email{Steve.Cumming@sbf.ulaval.ca} [contributor]
+  \item Jean Marchal \email{jean.d.marchal@gmail.com} [contributor]
   \item Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada [copyright holder]
 }
 
