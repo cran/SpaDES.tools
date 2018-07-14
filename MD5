@@ -1,6 +1,6 @@
-ef95a9c69066f13ca833604a2b486abd *DESCRIPTION
-8840e94b9c283d1fb0ee0803a5352db5 *NAMESPACE
-23335566aa1340f7512e5dcb074c1083 *NEWS.md
+4408dcc38d570bbf9d8a471b2d5f7ada *DESCRIPTION
+12f76b7ed53015c0fd49744cf6edf1d7 *NAMESPACE
+a5e556f9f18bedc4a65a5d55d3d4b0c6 *NEWS.md
 17bc2dd5e0762562317278ccfbeea6c5 *R/RcppExports.R
 1429ae39e5a0c9a00c04a22f8a3aeaa1 *R/SELES.R
 8257a4fad42d9165f3181faabb1c4c4b *R/distanceFromEachPoint.R
@@ -15,9 +15,9 @@ c230127af1f1b54da2acf2ac1ff3dedc *R/numerical-comparisons.R
 6b784eefbe8f699b7b55ffcbde31db37 *R/probability.R
 276955da8faa327ff3e884073d3a5af2 *R/resample.R
 abe5137d9a7aa6f70fa44f8b9058a3f7 *R/rings.R
-80fd3c9b0b6f7c64c54912475cf9f112 *R/spades-tools-deprecated.R
+a6b2c4da4e5b86c2c082e411c01cb70f *R/spades-tools-deprecated.R
 b444196c8576309babb373e8f3698dec *R/spades-tools-package.R
-ee21a9ff933dd94e3f2087f112ee2860 *R/splitRaster.R
+04b3d2d56c53d2a545cd686fcaf7ac3e *R/splitRaster.R
 9eb9009fc9d531a592a5d615c0324fda *R/spread.R
 92733a801dad120c8732447d23b32a54 *R/spread2.R
 922f4ca7fb203589e93b2650cbdb2bcb *R/zzz.R
@@ -40,7 +40,7 @@ a4cd29a1e5d31edf13404f37f64a549a *inst/examples/example_rings.R
 52d349c5b20bced7cc4282d1c6f316d7 *man/cir.Rd
 f543766d79a1b04ed9bf8885cae383d0 *man/cirSpecialQuick.Rd
 8e4d5123f44d9f1604fd6d53dfce8fa9 *man/crw.Rd
-e563c250f78a0706d4271a4a9ca00834 *man/deprecated.Rd
+98324f1b612b4e49b108f9fb7017c527 *man/deprecated.Rd
 819ebde1e9d950ca45f219f1cd08d95a *man/directions.Rd
 173f2932c8fe4b8485981c49e59d5cff *man/distanceFromEachPoint.Rd
 40e71d7874a8b8feca4ec3c3355422f6 *man/distances.Rd
@@ -63,7 +63,7 @@ b05a480cec6c9f21097261aaabfc90ab *man/resample.Rd
 edd3fa0c8525e98928c390d0d74d0bf8 *man/rings.Rd
 3e095940bdc5bc13631e65c264389506 *man/sampleV.Rd
 c20db6703a6039970662e96e2206d54a *man/specnumperpatch-probs.Rd
-1b54795ab3a89e04c9ecdba4e54e2d1f *man/splitRaster.Rd
+5eefc1fddabaf392a7a9ed5f9f1ad6d8 *man/splitRaster.Rd
 3004cabd6355385277f73adb55990b35 *man/spokes.Rd
 c4b821742e90bda46fbd0c000979139e *man/spread.Rd
 bd3db415a885a3c909054a62bebf15eb *man/spread2-internals.Rd
@@ -76,11 +76,11 @@ dbeb9efcae7f4e2839200961f7e7fdda *src/RcppExports.cpp
 998b0fb7eadbc202ffcd7a4e8f53d19e *src/runif.cpp
 2bdc49f238638e78647e341806d236a8 *tests/test-all.R
 54f92ff9ef5fc877275d2d40b9ac5112 *tests/testthat/test-adj.R
-35f04716caeefa91c8cbbc208a8e9ca3 *tests/testthat/test-examples.R
+1b09153dcfe8cbfb3bfae79d65061572 *tests/testthat/test-examples.R
 6710fcca20202c8eaddd9e15431d7a6e *tests/testthat/test-gaussMap.R
 c7af91bae7e94c9d0623efd740e74898 *tests/testthat/test-inRange.R
 816f78f526c6ac979a14e185790cdf78 *tests/testthat/test-mapReduce.R
 78076354c12b0887b2138ed6aaf2cf55 *tests/testthat/test-randomPolygon.R
-9fdaa60d741582b44d5d8dea66cf4a2f *tests/testthat/test-splitRaster.R
+755a416441d1dd4ef7cbdb960ab443dd *tests/testthat/test-splitRaster.R
 31510ad30d5366ccd848f9332ccb0604 *tests/testthat/test-spread.R
 8726ed489e9686b37f9cfcb53eba0e6f *tests/testthat/test-spread2.R
