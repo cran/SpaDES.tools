@@ -1,6 +1,6 @@
-232ace322a0f1f8eabc86e12f475fa0b *DESCRIPTION
+3273e278b249060f43eb8272ebd312d1 *DESCRIPTION
 6e90015c3e225c6ea71d12249827453a *NAMESPACE
-2ee931689011e0f00e287c6fa7577181 *NEWS.md
+3a91041d87c413c265288b009fcba595 *NEWS.md
 17bc2dd5e0762562317278ccfbeea6c5 *R/RcppExports.R
 4286d8b7caf52be2ec49d024018f6ca1 *R/SELES.R
 7d592255aa04c7d1cd602a2b833e6135 *R/distanceFromEachPoint.R
@@ -91,4 +91,4 @@ b300e0bb80ed69d630f7ee5891da4603 *tests/testthat/test-mergeRaster.R
 ce66de6758de20171d4e99de8d9240bb *tests/testthat/test-randomPolygon.R
 755a416441d1dd4ef7cbdb960ab443dd *tests/testthat/test-splitRaster.R
 5901e39f05be2c9820ba2f8434ea4523 *tests/testthat/test-spread.R
-1312210c9cdb7b703031356d1c398744 *tests/testthat/test-spread2.R
+d16cb058df4fe208eff96316cdfb7cb0 *tests/testthat/test-spread2.R
