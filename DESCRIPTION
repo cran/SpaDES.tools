@@ -10,8 +10,8 @@ Description: Provides GIS and map utilities, plus additional modeling tools for
     See '?SpaDES.tools' for an categorized overview of these additional tools.
 URL: https://spades-tools.predictiveecology.org,
         https://github.com/PredictiveEcology/SpaDES.tools
-Date: 2020-05-15
-Version: 0.3.5
+Date: 2020-06-22
+Version: 0.3.6
 Authors@R: c(
     person("Alex M", "Chubaty", email = "alex.chubaty@gmail.com",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7146-8135")),
@@ -51,7 +51,7 @@ Collate: 'RcppExports.R' 'heading.R' 'SELES.R'
         'studyArea.R' 'zzz.R'
 RoxygenNote: 7.1.0
 NeedsCompilation: yes
-Packaged: 2020-05-15 19:40:28 UTC; achubaty
+Packaged: 2020-06-23 03:03:53 UTC; achubaty
 Author: Alex M Chubaty [aut, cre] (<https://orcid.org/0000-0001-7146-8135>),
   Eliot J B McIntire [aut] (<https://orcid.org/0000-0002-6914-8316>),
   Yong Luo [ctb],
@@ -61,4 +61,4 @@ Author: Alex M Chubaty [aut, cre] (<https://orcid.org/0000-0001-7146-8135>),
     Minister of Natural Resources Canada [cph]
 Maintainer: Alex M Chubaty <alex.chubaty@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-05-15 20:10:02 UTC
+Date/Publication: 2020-06-23 05:30:32 UTC
