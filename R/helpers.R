@@ -1,7 +1,7 @@
 #' @keywords internal
 .requireNamespace <- function(pkg) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
-    stop(paste("Need to install.packages('", pkg, "')"))
+    stop(paste0("Need to install.packages('", pkg, "')"))
   }
 }
 
@@ -59,3 +59,7 @@ extnt <- function(x, ...) {
 
   return(x)
 }
+
+
+deg2 <- function(radian) (radian * 180)/pi
+rad2 <- function (degree) (degree * pi)/180

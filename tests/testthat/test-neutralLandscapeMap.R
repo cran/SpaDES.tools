@@ -1,8 +1,7 @@
 test_that("neutralLandscapeMap produces consistent rasters", {
+  testInit(c("NLMR"))
   skip_if_not_installed("NLMR", "1.1.1")
-  skip_if_not_installed("raster") # NLMR needs raster, apparently
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  rastDF <- needTerraAndRaster()
 
   # inputs for x
   aOrig <- terra::rast(system.file("extdata", "a.tif", package = "SpaDES.tools"))

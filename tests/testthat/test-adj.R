@@ -1,8 +1,6 @@
 test_that("adj.R results not identical to adjacent", {
-  # skip_if_not_installed(c("raster", "terra"))
-  withr::local_package("terra")
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  testInit("terra")
+  rastDF <- needTerraAndRaster()
 
   for (ii in seq(NROW(rastDF))) {
     pkg <- rastDF$pkg[ii]
@@ -28,7 +26,7 @@ test_that("adj.R results not identical to adjacent", {
                     adjMat <- adj(a, sam, directions = dirs, sort = sortTF,
                                   match.adjacent = ma, include = incl,
                                   target = targs, id = ids, pairs = prs, torus = tor)
-                    expect_equivalent(adjMat, adjDT)
+                    expect_equal(adjMat, adjDT, ignore_attr = TRUE)
                     if (!tor) {
                       useRasterPkg <- !is.null(targs) || isTRUE(sortTF) || !is.null(ids)
                       if (useRasterPkg) {
@@ -56,26 +54,29 @@ test_that("adj.R results not identical to adjacent", {
                         if (!prs) {
                           if (ma) {
                             if (useRasterPkg) {
-                              expect_equivalent(adjDT, adj2,
-                                                info = paste0("ma=", ma,
-                                                              ", dirs=", dirs,
-                                                              ", sortTF=", sortTF,
-                                                              ", incl=", incl,
-                                                              ", is.null(ids)=", is.null(ids),
-                                                              ", prs=", prs))
+                              expect_equal(adjDT, adj2,
+                                           info = paste0("ma=", ma,
+                                                         ", dirs=", dirs,
+                                                         ", sortTF=", sortTF,
+                                                         ", incl=", incl,
+                                                         ", is.null(ids)=", is.null(ids),
+                                                         ", prs=", prs),
+                                           ignore_attr = TRUE)
                             } else {
-                              expect_equivalent(sort(adjDT), unique(sort(na.omit(as.numeric(adj2)))),
-                                                info = paste0("ma=", ma,
-                                                              ", dirs=", dirs,
-                                                              ", sortTF=", sortTF,
-                                                              ", incl=", incl,
-                                                              ", is.null(ids)=", is.null(ids),
-                                                              ", prs=", prs))
+                              expect_equal(sort(adjDT), unique(sort(na.omit(as.numeric(adj2)))),
+                                           info = paste0("ma=", ma,
+                                                         ", dirs=", dirs,
+                                                         ", sortTF=", sortTF,
+                                                         ", incl=", incl,
+                                                         ", is.null(ids)=", is.null(ids),
+                                                         ", prs=", prs),
+                                           ignore_attr = TRUE)
                             }
 
                           } else {
-                            expect_equivalent(unique(sort(adjDT[, "to"])),
-                                              unique(sort(na.omit(as.numeric(sort(adj2))))))
+                            expect_equal(unique(sort(adjDT[, "to"])),
+                                         unique(sort(na.omit(as.numeric(sort(adj2))))),
+                                         ignore_attr = TRUE)
                           }
                         } else {
                           colOrd <- if (is.null(ids)) 1:2 else c(2, 3, 1)
@@ -83,14 +84,15 @@ test_that("adj.R results not identical to adjacent", {
                             if (!sortTF) {
                               # if (!isTRUE(all.equal(adjDT, adj2[, colOrd]))) browser()
                               if (useRasterPkg) {
-                                expect_equivalent(adjDT, adj2[, colOrd])
+                                expect_equal(adjDT, adj2[, colOrd], ignore_attr = TRUE)
                               } else {
-                                expect_equivalent(adj2[order(adj2[, "from"], adj2[, "to"]), ][, colOrd],
-                                                  adjDT[order(adjDT[, "from"], adjDT[, "to"]), ])
+                                expect_equal(adj2[order(adj2[, "from"], adj2[, "to"]), ][, colOrd],
+                                             adjDT[order(adjDT[, "from"], adjDT[, "to"]), ],
+                                             ignore_attr = TRUE)
                               }
                             } else {
-                              expect_equivalent(adjDT, adj2[order(adj2[, "from"],
-                                                                  adj2[, "to"]), colOrd])
+                              expect_equal(adjDT, adj2[order(adj2[, "from"], adj2[, "to"]), colOrd],
+                                           ignore_attr = TRUE)
                             }
                           } else {
                             if (!sortTF) {
@@ -98,7 +100,7 @@ test_that("adj.R results not identical to adjacent", {
                               # then they mostly don't match
 
                               if (sum((adjDT - adj2[, colOrd]) ^ 2) == 0) {
-                                expect_equivalent(adjDT, adj2[, colOrd])
+                                expect_equal(adjDT, adj2[, colOrd], ignore_attr = TRUE)
                               } else {
                                 # sum of squared difference should be positive
                                 expect_gt(sum((adjDT - adj2[, colOrd]) ^ 2), 0)
@@ -120,9 +122,8 @@ test_that("adj.R results not identical to adjacent", {
 })
 
 test_that("errors in adj are not correct", {
-  withr::local_package("terra")
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  testInit("terra")
+  rastDF <- needTerraAndRaster()
 
   for (ii in seq(NROW(rastDF))) {
     pkg <- rastDF$pkg[ii]
@@ -138,10 +139,8 @@ test_that("errors in adj are not correct", {
 })
 
 test_that("adj.R: torus does not work as expected", {
-
-  withr::local_package("terra")
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  testInit("terra")
+  rastDF <- needTerraAndRaster()
 
   for (ii in seq(NROW(rastDF))) {
     pkg <- rastDF$pkg[ii]

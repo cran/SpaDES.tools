@@ -1,11 +1,14 @@
+library(data.table)
 library(terra)
 
+origDTThreads <- data.table::setDTthreads(2L)
+origNcpus <- options(Ncpus = 2L)
 set.seed(1462)
 
 # circle centred
 ras <- rast(ext(0, 15, 0, 15), res = 1, val = 0)
 middleCircle <- cir(ras)
-ras[middleCircle[, "indices"]] <- 1
+ras[middleCircle[ , "indices"]] <- 1
 circlePoints <- vect(middleCircle[, c("x", "y")])
 if (interactive()) {
   # clearPlot()
@@ -26,7 +29,6 @@ cirsRas[] <- 0
 cirsRas[cirs[, "indices"]] <- 1
 
 if (interactive()) {
-  # clearPlot()
   terra::plot(ras)
   terra::plot(cirsRas, add = TRUE, col = c("transparent", "#00000055"))
   terra::plot(agent, add = TRUE)
@@ -51,16 +53,14 @@ if (interactive()) {
 }
 
 # rings
-if (require("CircStats")) {
-  loci <- cellFromXY(hab, crds(coords))
-  cirs2 <- rings(hab, loci, maxRadius = radius, minRadius = radius - 1, returnIndices = TRUE)
+loci <- cellFromXY(hab, crds(coords))
+cirs2 <- rings(hab, loci, maxRadius = radius, minRadius = radius - 1, returnIndices = TRUE)
 
-  ras2 <- rast(hab)
-  ras2[] <- 0
-  ras2[cirs2$indices] <- cirs2$id
-  if (interactive()) {
-    terra::plot(c(ras1, ras2))
-  }
+ras2 <- rast(hab)
+ras2[] <- 0
+ras2[cirs2$indices] <- cirs2$id
+if (interactive()) {
+  terra::plot(c(ras1, ras2))
 }
 
 hab <- rast(system.file("extdata", "hab2.tif", package = "SpaDES.tools"))
@@ -83,3 +83,6 @@ circ <- cir(ras, coords, angles = seq(0, 2 * pi, length.out = 21),
             maxRadius = 200, minRadius = 0, returnIndices = FALSE,
             allowOverlap = TRUE, returnAngles = TRUE)
 
+# clean up
+data.table::setDTthreads(origDTThreads)
+options(Ncpus = origNcpus)

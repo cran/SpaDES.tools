@@ -1,11 +1,8 @@
 test_that("mergeRaster will return a message if tiles are resampled", {
-
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  rastDF <- needTerraAndRaster()
   nx <- ny <- 3
 
   for (ii in seq(NROW(rastDF))) {
-
     pkg <- rastDF$pkg[ii]
     cls <- rastDF$class[ii]
     read <- eval(parse(text = rastDF$read[ii]))
@@ -16,14 +13,15 @@ test_that("mergeRaster will return a message if tiles are resampled", {
     if (pkg == "terra") {
       names(rastArgs) <- c("xmin", "xmax", "ymin", "ymax")
     }
-    rastArgs <- append(rastArgs, list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                                      resolution = c(30, 30),
-                                      vals = round(runif(n = 14400, min = 1, max = 10))))
+    rastArgs <- append(rastArgs,
+                       list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                            resolution = c(30, 30),
+                            vals = round(runif(n = 14400, min = 1, max = 10))))
 
     ras <- do.call(read, rastArgs)
 
     splitted <- splitRaster(r = ras, nx = nx, ny = ny, buffer = c(3, 3))
-    expect_is(splitted, "list")
+    expect_type(splitted, "list")
     expect_length(splitted, nx * ny)
 
     splitted <- lapply(X = seq_along(splitted), FUN = function(tiles, pkg, ras) {
@@ -38,21 +36,22 @@ test_that("mergeRaster will return a message if tiles are resampled", {
       y <- do.call(read, rastArgs)
 
       expect_false(any(res(y) == res(ras)))
-      r <- terra::resample(x = ras, y = y)  ## always use `terra`, it's compatible with RasterLayer - getFromNameSpace("resample", "raster") doesn't work.
+      ## always use `terra`, it's compatible with RasterLayer  objects;
+      ##   getFromNameSpace("resample", "raster") doesn't work.
+      r <- terra::resample(x = ras, y = y)
       return(r)
     }, pkg = pkg, ras = ras)
 
-    expect_is(splitted, "list")
+    expect_type(splitted, "list")
     expect_message({
       merged <- mergeRaster(x = splitted)
     })
-    expect_is(merged, cls)
+    expect_s4_class(merged, cls)
   }
 })
 
 test_that("mergeRaster will produce a raster layer", {
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  rastDF <- needTerraAndRaster()
   nx <- ny <- 3
 
   for (ii in seq(NROW(rastDF))) {
@@ -66,24 +65,23 @@ test_that("mergeRaster will produce a raster layer", {
     if (pkg == "terra") {
       names(rastArgs) <- c("xmin", "xmax", "ymin", "ymax")
     }
-    rastArgs <- append(rastArgs, list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                                      resolution = c(30, 30),
-                                      vals = round(runif(n = 14400, min = 1, max = 10))))
+    rastArgs <- append(rastArgs,
+                       list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                            resolution = c(30, 30),
+                            vals = round(runif(n = 14400, min = 1, max = 10))))
 
     ras <- do.call(read, rastArgs)
 
     splitted <- splitRaster(r = ras, nx = nx, ny = ny, buffer = c(5, 5))
-    expect_is(splitted, "list")
+    expect_type(splitted, "list")
     expect_length(splitted, nx * ny)
     merged <- mergeRaster(x = splitted)
-    expect_is(merged, cls)
+    expect_s4_class(merged, cls)
   }
 })
 
 test_that("mergeRaster will produce error if only one raster passed", {
-
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  rastDF <- needTerraAndRaster()
 
   for (ii in seq(NROW(rastDF))) {
     pkg <- rastDF$pkg[ii]
@@ -95,9 +93,10 @@ test_that("mergeRaster will produce error if only one raster passed", {
     if (pkg == "terra") {
       names(rastArgs) <- c("xmin", "xmax", "ymin", "ymax")
     }
-    rastArgs <- append(rastArgs, list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                                      resolution = c(30, 30),
-                                      vals = round(runif(n = 14400, min = 1, max = 10))))
+    rastArgs <- append(rastArgs,
+                       list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                            resolution = c(30, 30),
+                            vals = round(runif(n = 14400, min = 1, max = 10))))
 
     ras <- do.call(read, rastArgs)
     expect_error({
@@ -107,8 +106,7 @@ test_that("mergeRaster will produce error if only one raster passed", {
 })
 
 test_that("mergeRaster will use mosaic with default mean if rasters are resampled and fun if passed", {
-  rastDF <- needTerraAndRaster() #
-  data.table::setDTthreads(1)
+  rastDF <- needTerraAndRaster()
   nx <- ny <- 3
 
   for (ii in seq(NROW(rastDF))) {
@@ -122,14 +120,15 @@ test_that("mergeRaster will use mosaic with default mean if rasters are resample
     if (pkg == "terra") {
       names(rastArgs) <- c("xmin", "xmax", "ymin", "ymax")
     }
-    rastArgs <- append(rastArgs, list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                                      resolution = c(30, 30),
-                                      vals = round(runif(n = 14400, min = 1, max = 10))))
+    rastArgs <- append(rastArgs,
+                       list(crs = "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                            resolution = c(30, 30),
+                            vals = round(runif(n = 14400, min = 1, max = 10))))
 
     ras <- do.call(read, rastArgs)
 
     splitted <- splitRaster(r = ras, nx = nx, ny = ny, buffer = c(10, 10))
-    expect_is(splitted, "list")
+    expect_type(splitted, "list")
     expect_length(splitted, nx * ny)
     splitted <- lapply(X = seq_along(splitted), FUN = function(tiles, pkg) {
       rastArgs <- list(xmn = xmin(splitted[[tiles]]),
@@ -146,14 +145,14 @@ test_that("mergeRaster will use mosaic with default mean if rasters are resample
       r <- terra::resample(x = ras, y = y) ## use terra always. compatible with RasterLayer
       return(r)
     }, pkg = pkg)
-    expect_is(splitted, "list")
+    expect_type(splitted, "list")
     expect_message({
       merged <- mergeRaster(x = splitted)
     })
     expect_message({
       merged2 <- mergeRaster(x = splitted, fun = max)
     })
-    expect_is(merged, cls)
-    expect_is(merged2, cls)
+    expect_s4_class(merged, cls)
+    expect_s4_class(merged2, cls)
   }
 })

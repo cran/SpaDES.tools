@@ -109,7 +109,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
   #if (any(abs(advectionDir) > 2 * pi)) {
     messAngles <- "degrees"
-    advectionDir <- CircStats::rad(advectionDir)
+    advectionDir <- rad2(advectionDir)
   # } else {
   #   messAngles <- "radians"
   # }
@@ -146,7 +146,6 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     # faster than assessing with a which()
     active <- spreadState$whActive
     inactive <- spreadState$whInactive
-
 
     iteration <- spreadState$totalIterations
     if (verbose > 1) message("Iteration ", iteration)

@@ -48,14 +48,15 @@ utils::globalVariables(c(
 #' to
 #' `asymmetryAngle`
 #' using:
-#' `angleQuality <- (cos(angles - CircStats::rad(asymmetryAngle))+1)/2`
+#' `angleQuality <- (cos(angles - rad2(asymmetryAngle))+1)/2`
+#' where `rad2 <- function (degree) (degree * pi)/180`
 #'
-#' These are then converted to multiple spreadProbs by
-#' `spreadProbs <- lowSpreadProb+(angleQuality * diff(spreadProbsLH))`
+#' These are then converted to multiple `spreadProbs` by
+#' `spreadProbs <- lowSpreadProb + (angleQuality * diff(spreadProbsLH))`
 #' To maintain an expected `spreadProb` that is the same as the asymmetric
 #' `spreadProbs`, these are then rescaled so that the mean of the
 #' asymmetric spreadProbs is always equal to spreadProb at every iteration:
-#' `spreadProbs <- spreadProbs - diff(c(spreadProb,mean(spreadProbs)))`
+#' `spreadProbs <- spreadProbs - diff(c(spreadProb, mean(spreadProbs)))`
 #'
 #' @section Breaking out of spread events:
 #'
@@ -195,7 +196,7 @@ utils::globalVariables(c(
 #'                      See Details.
 #'
 #' @param spreadProbLater Numeric, or `RasterLayer`. If provided, then this
-#'                      will become the spreadProb after the first iteration.
+#'                      will become the `spreadProb` after the first iteration.
 #'                      See Details.
 #'
 #' @param spreadState   `data.table`. This should be the output of a previous call
@@ -493,7 +494,6 @@ spread <- function(landscape, loci = NA_real_, spreadProb = 0.23, persistence = 
 
     # circle needs directions to be 8
     if (circle | !is.na(asymmetry)) {
-      .requireNamespace("CircStats")
       if (circle) directions <- 8L # only required for circle
       initialLociXY <- cbind(id = seq_along(initialLoci), xyFromCell(landscape, initialLoci))
       id <- TRUE
@@ -762,7 +762,7 @@ spread <- function(landscape, loci = NA_real_, spreadProb = 0.23, persistence = 
         }
         d <- directionFromEachPoint(from = initialLociXY, to = a)
         newSpreadProbExtremes <- (spreadProb[] * 2) / (asymmetry + 1) * c(1, asymmetry)
-        angleQuality <- (cos(d[, "angles"] - CircStats::rad(asymmetryAngle)) + 1) / 2
+        angleQuality <- (cos(d[, "angles"] - rad2(asymmetryAngle)) + 1) / 2
         spreadProbs <- newSpreadProbExtremes[1] + (angleQuality * diff(newSpreadProbExtremes))
         spreadProbs <- spreadProbs - diff(c(spreadProb[], mean(spreadProbs)))
       }
@@ -849,7 +849,7 @@ spread <- function(landscape, loci = NA_real_, spreadProb = 0.23, persistence = 
                 }
               }
             }
-            potentials <- d[, !(colnames(d) %in% c("x", "y")), drop = FALSE]
+            potentials <- d[, !(colnames(d) %in% xycolNames), drop = FALSE]
             potentials <- potentials[(d[, "dists"] %<=% cMR), , drop = FALSE]
           }
         }

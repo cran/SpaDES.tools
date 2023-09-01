@@ -1,10 +1,24 @@
-Known issues: <https://github.com/PredictiveEcology/SpaDES.tools/issues>
+# SpaDES.tools (development version)
+
+# SpaDES.tools 2.0.4
+
+## Enhancements
+* improved documentation
+* address new features of `quickPlot`
+* minor modifications to `crw` to allow downstream packages that use `matrix` classes instead of `sf` or `SpatVector` classes for "agents"
+* address timing issue on CRAN machines
+
+## Dependency changes
+* removed Suggests dependencies `CircStats`, `dplyr`, `purrr`, `DBI`, `RColorBrewer`, `googledrive`, `snow`
+
+## Bug fixes
+* none
 
 # SpaDES.tools 2.0.0
 
 ## Enhancements
 * wholesale transition to `terra` from `raster` and `sp`. Some functionality is available for `sf`, but this will not be complete.
-* `splitRaster()` uses ".tif" as the default raster file type
+* `splitRaster()` uses `".tif"` as the default raster file type
 * most example plotting uses `terra::plot` directly, but in a few cases, `quickPlot::Plot` is used as it is much better (e.g., `spread2(plot.it = TRUE)`)
 
 ## Dependency changes

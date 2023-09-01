@@ -1,4 +1,8 @@
+library(data.table)
 library(terra)
+
+origDTThreads <- data.table::setDTthreads(2L)
+origNcpus <- options(Ncpus = 2L)
 set.seed(1234)
 
 ras <- terra::rast(terra::ext(0, 10, 0, 10), res = 1, val = 0)
@@ -35,3 +39,7 @@ if (NROW(d2) > 0) {
 }
 if (interactive())
   terra::plot(coords, add = TRUE, pch = 19, col = "blue")
+
+# clean up
+data.table::setDTthreads(origDTThreads)
+options(Ncpus = origNcpus)

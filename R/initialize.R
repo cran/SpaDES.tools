@@ -24,7 +24,7 @@ utils::globalVariables("num.in.pop")
 #'                 Should be in the interval `[0,2]` to provide a valid covariance function.
 #'                 Default is 1.
 #'
-#' @param inMemory Should the RasterLayer be forced to be in memory?
+#' @param inMemory Should the `RasterLayer` be forced to be in memory?
 #'                 Default `FALSE`.
 #'
 #' @param ... Additional arguments to `raster`.
@@ -82,6 +82,9 @@ gaussMap <- function(x, scale = 10, var = 1, speedup = 1, method = "RMexp",
 #' @rdname randomPolygons
 #'
 #' @examples
+#' origDTThreads <- data.table::setDTthreads(2L)
+#' origNcpus <- options(Ncpus = 2L)
+#'
 #' set.seed(1234)
 #' Ras <- randomPolygons(numTypes = 5)
 #' if (interactive() ) {
@@ -89,13 +92,19 @@ gaussMap <- function(x, scale = 10, var = 1, speedup = 1, method = "RMexp",
 #' }
 #'
 #' # more complex patterning, with a range of patch sizes
-#' a <- randomPolygons(numTypes = 400, terra::rast(terra::ext(0, 50, 0, 50), res = 1, vals = 0))
+#' r <- terra::rast(terra::ext(0, 50, 0, 50), resolution = 1, vals = 0)
+#' a <- randomPolygons(numTypes = 400, r)
 #' a[a < 320] <- 0
 #' a[a >= 320] <- 1
 #' clumped <- terra::patches(a)
 #' if (interactive()) {
 #'   terra::plot(a)
 #' }
+#'
+#' # clean up
+#' data.table::setDTthreads(origDTThreads)
+#' options(Ncpus = origNcpus)
+#'
 randomPolygons <- function(ras = rast(ext(0, 15, 0, 15), res = 1, vals = 0),
                            numTypes = 2, ...) {
   args <- list(...)
@@ -138,8 +147,7 @@ randomPolygons <- function(ras = rast(ext(0, 15, 0, 15), res = 1, vals = 0),
 #'
 #' @examples
 #' library(terra)
-#' b <- terra::vect(cbind(-110, 59))
-#' crs(b) <- terra::crs("epsg:4326")
+#' b <- terra::vect(cbind(-110, 59), crs = "epsg:4326")
 #' a <- randomPolygon(b, area = 1e6)
 #' if (interactive()) {
 #'   plot(a)
@@ -264,9 +272,8 @@ rndmPolygonMatrix <- function(x, hectares, area) {
   randomPolygon(x, area = area)
 }
 
-#' @importFrom reproducible .requireNamespace
 rndmPolygonSpatialPolygons <- function(x, hectares, area) {
-  .Deprecated("User should convert to using SpatVector rather that SpatialPoints")
+  .Deprecated("User should convert to using SpatVector rather than SpatialPoints")
   .requireNamespace("sf")
   .requireNamespace("sp")
 
@@ -301,9 +308,6 @@ rndmPolygonSpatialPolygons <- function(x, hectares, area) {
     message("The CRS provided is not in meters; ",
             "converting internally to UTM so area will be approximately correct.")
   }
-  # areaCRS <- CRS(paste0("+proj=lcc +lat_1=", ymin(x), " +lat_2=", ymax(x),
-  #                       " +lat_0=0 +lon_0=", xmin(x), " +x_0=0 +y_0=0 +ellps=GRS80",
-  #                       " +units=m +no_defs"))
 
   #y <- spTransform(x, areaCRS)
 
@@ -334,6 +338,7 @@ rndmPolygonSpatialPolygons <- function(x, hectares, area) {
   }
   outPolygon
 }
+
 ################################################################################
 #' Initiate a specific number of agents in a map of patches
 #'
@@ -355,6 +360,9 @@ rndmPolygonSpatialPolygons <- function(x, hectares, area) {
 #'
 #' @examples
 #' library(data.table)
+#'
+#' origDTThreads <- data.table::setDTthreads(2L)
+#' origNcpus <- options(Ncpus = 2L)
 #'
 #' set.seed(1234)
 #' Ntypes <- 4
@@ -384,6 +392,10 @@ rndmPolygonSpatialPolygons <- function(x, hectares, area) {
 #' if (interactive()) {
 #'   terra::plot(rasAgents)
 #' }
+#'
+#' # clean up
+#' data.table::setDTthreads(origDTThreads)
+#' options(Ncpus = origNcpus)
 #'
 #' @export
 #' @importFrom data.table data.table setkey
@@ -487,7 +499,7 @@ specificNumPerPatch <- function(patches, numPerPatchTable = NULL, numPerPatchMap
 #         if (is(agentlocation,"Raster")) {
 #           xy = matrix(runif(numagents*2, c(xmin(ext), ymin(ext)),
 #                             c(xmax(ext), ymax(ext))), ncol = 2, byrow = TRUE)
-#           colnames(xy) = c("x", "y")
+#           colnames(xy) = xycolNames
 #           position <- SpatialPoints(xy)
 #           position <- SpatialPoints(sampleRandom(agentlocation, numagents, xy = TRUE, sp = TRUE))
 #         } else if (is(agentlocation,"SpatialPoints")) {
@@ -554,7 +566,7 @@ long2UTM <- function(long) {
 #' @param type     One of the supported `NLMR` functions.
 #'
 #' @param ...      Further arguments passed to `NLMR` function specified in `type`
-#'  (except ncol, nrow and resolution, which are extracted from `x`)
+#'  (except `ncol`, `nrow` and `resolution`, which are extracted from `x`).
 #'
 #' @importFrom terra res ncol nrow ext extend focal
 #' @export
@@ -566,7 +578,8 @@ long2UTM <- function(long) {
 #'
 #' @examples
 #' \donttest{
-#'   if (requireNamespace("NLMR", quietly = TRUE)) {
+#'   if (requireNamespace("NLMR", quietly = TRUE) &&
+#'       requireNamespace("raster", quietly = TRUE)) {
 #'     library(terra)
 #'     nx <- ny <- 100L
 #'     r <- rast(nrows = ny, ncols = nx, xmin = -nx/2, xmax = nx/2, ymin = -ny/2, ymax = ny/2)

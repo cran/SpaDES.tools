@@ -7,11 +7,11 @@
 initiateAgents(map, numAgents, probInit, asSpatialPoints = TRUE, indices)
 }
 \arguments{
-\item{map}{RasterLayer with extent and resolution of desired return object}
+\item{map}{\code{RasterLayer} with extent and resolution of desired return object}
 
 \item{numAgents}{numeric resulting from a call to \code{\link[=numAgents]{numAgents()}}}
 
-\item{probInit}{a Raster resulting from a \code{\link[=probInit]{probInit()}} call}
+\item{probInit}{a \code{Raster} resulting from a \code{\link[=probInit]{probInit()}} call}
 
 \item{asSpatialPoints}{logical or \code{"sf"}. Should returned object be \code{RasterLayer}
 or \code{SpatVector} default (or legacy \code{TRUE} \code{SpatialPointsDataFrame})}
@@ -32,7 +32,11 @@ You must know how to use SELES for these to be useful.
 }
 \examples{
 if (require("sf", quietly = TRUE)) {
+  library(data.table)
   library(terra)
+
+  origDTThreads <- data.table::setDTthreads(2L)
+  origNcpus <- options(Ncpus = 2L)
 
   map <- rast(system.file("extdata", "map.tif", package = "SpaDES.tools"))
   names(map) <- "layer"
@@ -43,7 +47,6 @@ if (require("sf", quietly = TRUE)) {
     terra::plot(agents, add = TRUE)
   }
   # Test that they are indeed selecting according to probabilities in pr
-  library(data.table)
   dt1 <- data.table(table(round(extract(map, agents), 0)[, "layer"]))
   setnames(dt1, old = "N", new = "count")
   dt2 <- data.table(table(round(map[], 0)))
@@ -63,6 +66,10 @@ if (require("sf", quietly = TRUE)) {
   if (interactive()) {
     terra::plot(agentsRas)
   }
+  #'
+  # clean up
+  data.table::setDTthreads(origDTThreads)
+  options(Ncpus = origNcpus)
 }
 }
 \author{

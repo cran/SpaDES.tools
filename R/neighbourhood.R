@@ -20,7 +20,7 @@ utils::globalVariables(c("angles", "indices", "to", "x", "y", "rasterVal"))
 #' The steps used in the algorithm are:
 #' 1. Calculate indices of neighbouring cells
 #' 2. Remove "to" cells that are
-#'    - <1 or >numCells (i.e., they are above or below raster), using a single modulo
+#'    - `< 1` or `> numCells` (i.e., they are above or below raster), using a single modulo
 #'      calculation
 #'    - where the modulo of "to" cells is equal to 1 if "from" cells are 0 (wrapped right
 #'      to left)
@@ -99,6 +99,10 @@ utils::globalVariables(c("angles", "indices", "to", "x", "y", "rasterVal"))
 #'
 #' @examples
 #' library(terra)
+#'
+#' origDTThreads <- data.table::setDTthreads(2L)
+#' origNcpus <- options(Ncpus = 2L)
+#'
 #' a <- rast(ext(0, 1000, 0, 1000), res = 1)
 #' sam <- sample(1:ncell(a), 1e4)
 #' numCol <- ncol(a)
@@ -106,6 +110,10 @@ utils::globalVariables(c("angles", "indices", "to", "x", "y", "rasterVal"))
 #' adj.new <- adj(numCol = numCol, numCell = numCell, cells = sam, directions = 8)
 #' adj.new <- adj(numCol = numCol, numCell = numCell, cells = sam, directions = 8,
 #'                include = TRUE)
+#'
+#' # clean up
+#' data.table::setDTthreads(origDTThreads)
+#' options(Ncpus = origNcpus)
 #'
 adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
                     include = FALSE, target = NULL, numCol = NULL, numCell = NULL,
@@ -274,12 +282,12 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
     ## use data.table
     # Remove all cells that are not target cells, if target is a vector of cells
     if (!is.null(target)) {
-      set(adj, , "ord", seq_len(NROW(adj)))
+      set(adj, NULL, "ord", seq_len(NROW(adj)))
       setkeyv(adj, "to")
       adj <- adj[J(target)]
       adj <- na.omit(adj)
       setkeyv(adj, "ord")
-      set(adj, , "ord", NULL)
+      set(adj, NULL, "ord", NULL)
     }
 
     if (sort) {
@@ -297,7 +305,7 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
     # Remove the "from" column if pairs is FALSE
     if (!pairs) {
       from <- as.integer(adj$from)
-      set(adj, , "from", NULL)
+      set(adj, NULL, "from", NULL)
     }
 
     if (!torus) {
@@ -363,32 +371,32 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
 }
 
 ##############################################################
-#' Identify pixels in a circle or ring (donut) around an object.
+#' Identify pixels in a circle or ring (doughnut) around an object.
 #'
 #' Identify the pixels and coordinates that are at a (set of) buffer distance(s)
 #' of the objects passed into `coords`.
-#' This is similar to `sf::st_buffer` but much faster and without the geo referencing information.
+#' This is similar to `sf::st_buffer` but much faster and without the georeferencing information.
 #' In other words, it can be used for similar problems, but where speed is important.
 #' This code is substantially adapted from `PlotRegionHighlighter::createCircle`.
 #'
 #' @param landscape Raster on which the circles are built.
 #'
-#' @param coords Either a matrix with 2 (or 3) columns, x and y (and id), representing the
+#' @param coords Either a matrix with 2 (or 3) columns, `x` and `y` (and `id`), representing the
 #'               coordinates (and an associated id, like cell index),
 #'               or a `SpatialPoints*` object around which to make circles. Must be same
 #'               coordinate system as the `landscape` argument. Default is missing,
-#'               meaning it uses the default to `loci`
+#'               meaning it uses the default to `loci`.
 #'
-#' @param loci   Numeric. An alternative to `coords`. These are the indices on
-#'               `landscape` to initiate this function. See `coords`. Default is one
-#'               point in centre of `landscape`..
+#' @param loci   Numeric. An alternative to `coords`.
+#'               These are the indices on `landscape` to initiate this function (see `coords`).
+#'               Default is one point in centre of `landscape`.
 #'
-#' @param maxRadius  Numeric vector of length 1 or same length as coords
+#' @param maxRadius  Numeric vector of length 1 or same length as `coords`
 #'
 #' @param minRadius  Numeric vector of length 1 or same length as `coords`. Default is
 #'                   `maxRadius`, meaning return all cells that are touched
 #'                   by the narrow ring at that exact radius. If smaller than `maxRadius`,
-#'                   then this will create a buffer or donut or ring.
+#'                   then this will create a buffer or doughnut or ring.
 #'
 #' @param allowOverlap Logical. Should duplicates across id be removed or kept. Default TRUE.
 #'
@@ -402,23 +410,23 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
 #'
 #' @param returnDistances Logical. If `TRUE`, then a column will be added to the returned
 #'                        data.table that reports the distance from `coords` to every
-#'                        point that was in the circle/donut surrounding `coords`. Default
-#'                        `FALSE`, which is faster.
+#'                        point that was in the circle/doughnut surrounding `coords`.
+#'                        Default `FALSE`, which is faster.
 #'
 #' @param angles Numeric. Optional vector of angles, in radians, to use. This will create
-#'               "spokes" outward from coords. Default is `NA`, meaning, use internally
+#'               "spokes" outward from `coords.` Default is `NA`, meaning, use internally
 #'               derived angles that will "fill" the circle.
 #'
 #' @param returnAngles Logical. If `TRUE`, then a column will be added to the returned
 #'                     data.table that reports the angle from `coords` to every
-#'                     point that was in the circle/donut surrounding `coords`. Default `FALSE.`
+#'                     point that was in the circle/doughnut surrounding `coords`. Default `FALSE.`
 #'
 #' @param closest Logical. When determining non-overlapping circles, should the function
 #'                give preference to the closest `loci` or the first one (much faster).
 #'                Default is `FALSE`, meaning the faster, though maybe not desired behaviour.
 #'
 #' @param simplify logical. If `TRUE`, then all duplicate pixels are removed.
-#' This means that some x, y combinations will disappear.
+#'                 This means that some `x`, `y` combinations will disappear.
 #'
 #' @inheritParams spread
 #'
@@ -436,12 +444,6 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
 #' the `indices` (i.e., cell number) of the `landscape`
 #' associated with the ring or circle being identified by this function.
 #'
-#' @importFrom data.table data.table set setkeyv
-#' @importFrom fpCompare %==%
-#' @importFrom terra cellFromXY extract res xyFromCell ncell ncol
-#' @export
-#' @rdname cir
-#'
 #' @seealso [rings()] which uses `spread` internally.
 #' `cir` tends to be faster when there are few starting points, `rings` tends to be faster
 #' when there are many starting points. `cir` scales with `maxRadius^2` and `coords`.
@@ -453,10 +455,11 @@ adj <- function(x = NULL, cells, directions = 8, sort = FALSE, pairs = TRUE,
 #'
 #' @example inst/examples/example_cir.R
 #'
-# setMethod(
-#   "cir",
-#   signature(landscape = "RasterLayer", coords = "matrix", loci = "missing"),
-#   definition =
+#' @export
+#' @importFrom data.table data.table set setkeyv
+#' @importFrom fpCompare %==%
+#' @importFrom terra cellFromXY extract res xyFromCell ncell ncol
+#' @rdname cir
 cir <- function(landscape, coords, loci,
                 maxRadius = ncol(landscape) / 4, minRadius = maxRadius,
                 allowOverlap = TRUE, allowDuplicates = FALSE,
@@ -492,7 +495,7 @@ cir <- function(landscape, coords, loci,
 
   ### adapted from createCircle of the package PlotRegionHighlighter
 
-  if (!all(c("x", "y") %in% colnames(coords))) {
+  if (!all(xycolNames %in% colnames(coords))) {
     stop("coords must have columns named x and y")
   }
   suppliedAngles <- if (all(!is.na(angles))) TRUE else FALSE
@@ -678,7 +681,7 @@ cir <- function(landscape, coords, loci,
 
     b <- cbind(coords, id = seq_len(NROW(coords)))
 
-    colnames(b)[1:2] <- c("x", "y")
+    colnames(b)[1:2] <- xycolNames
     d <- distanceFromEachPoint(b, a)
 
     if (closest) {
@@ -759,7 +762,8 @@ cir <- function(landscape, coords, loci,
 ################################################################################
 #' Wrap coordinates or pixels in a torus-like fashion
 #'
-#' Generally useful for model development purposes.
+#' Generally useful for model development purposes. Primarily used internally
+#' in e.g., `crw` if `torus = TRUE`.
 #'
 #' If `withHeading` used, then `X` must be an `sf` or `SpatVector` object
 #' that contains two columns, `x1` and `y1`, with the immediately
@@ -773,11 +777,15 @@ cir <- function(landscape, coords, loci,
 #'                    also so that the subsequent heading calculation will work.
 #'                    Default `FALSE`. See details.
 #'
-#' @return Object of the same class as `X`, but with coordinates updated to
-#'         reflect the wrapping.
+#' @return Object of the same class as `X`, but with coordinates updated to reflect the wrapping.
+#'
+#' @author Eliot McIntire
+#' @export
 #'
 #' @examples
-#' if (require("sf")) {
+#' origDTThreads <- data.table::setDTthreads(2L)
+#' origNcpus <- options(Ncpus = 2L)
+#'
 #' xrange <- yrange <- c(-50, 50)
 #' hab <- terra::rast(terra::ext(c(xrange, yrange)))
 #' hab[] <- 0
@@ -801,22 +809,27 @@ cir <- function(landscape, coords, loci,
 #'   # clearPlot()
 #'   terra::plot(hab, col = "white")
 #' }
+#'
 #' for (i in 1:10) {
 #'   agent <- crw(agent = agent, extent = terra::ext(hab), stepLength = ln,
-#'                stddev = sd, lonlat = FALSE, torus = TRUE)
-#' if (interactive()) terra::plot(agent[, 1], add = TRUE, col = 1:10)
+#'                stddev = sd, lonlat = FALSE, torus = FALSE) # don't wrap
+#'   if (interactive()) terra::plot(agent[, 1], add = TRUE, col = 1:10)
 #' }
-#' }
+#' terra::crds(agent) # many are "off" the map, i.e., beyond the extent of hab
+#' agent <- SpaDES.tools::wrap(agent, bounds = terra::ext(hab))
+#' terra::plot(agent, add = TRUE, col = 1:10) # now inside the extent of hab
 #'
-#' @author Eliot McIntire
-#' @export
-#' @rdname wrap
+#' # clean up
+#' data.table::setDTthreads(origDTThreads)
+#' options(Ncpus = origNcpus)
+#'
 wrap <- function(X, bounds, withHeading = FALSE) {
   classX <- is(X)
 
-  if (is(X, "matrix")) {
-    X <- terra::vect(data.frame(x1 = X[, 1], y1 = X[, 2], X), geom = c("x", "y"))
-  } else if (is(X, "sf")) {
+  # if (is(X, "matrix")) {
+  #   X <- terra::vect(data.frame(x1 = X[, 1], y1 = X[, 2], X), geom = xycolNames)
+  # } else
+  if (is(X, "sf")) {
     X <- terra::vect(X)
   }
 
@@ -835,8 +848,13 @@ wrap <- function(X, bounds, withHeading = FALSE) {
     ymaxs <- crdsStart[, 2] > Ymax
 
     # SpatVector returns data.frame; sf returns vector
-    x1 <- if (is.data.frame(X[["x1"]])) X[["x1"]][, 1] else X[["x1"]]
-    y1 <- if (is.data.frame(X[["y1"]])) X[["y1"]][, 1] else X[["y1"]]
+    if (is.matrix(X)) {
+      x1 <- X[, "x1"]
+      y1 <- X[, "y1"]
+    } else {
+      x1 <- if (is.data.frame(X[["x1"]])) X[["x1"]][, 1] else X[["x1"]]
+      y1 <- if (is.data.frame(X[["y1"]])) X[["y1"]][, 1] else X[["y1"]]
+    }
 
      # if (any(c(xmins, ymins, xmaxs, ymaxs)))
      #   browser()
@@ -852,7 +870,7 @@ wrap <- function(X, bounds, withHeading = FALSE) {
   }
   # signature(X = "matrix", bounds = "Extent", withHeading = "missing"),
   # definition = function(X, bounds) {
-  if (identical(tolower(colnames(crdsStart)), c("x", "y"))) {
+  if (identical(tolower(colnames(crdsStart)), xycolNames)) {
     # terra::vect uses capitals X Y
     crds <- cbind(
       x = (crdsStart[, 1] - terra::xmin(bounds)) %% (terra::xmax(bounds) - terra::xmin(bounds)) +
@@ -870,7 +888,7 @@ wrap <- function(X, bounds, withHeading = FALSE) {
   }
 
   if ("matrix" %in% classX) {
-    return(coords(X))
+    return(X)
   } else if ("sf" %in% classX) {
     .requireNamespace("sf")
     return(sf::st_as_sf(X))
@@ -1021,7 +1039,7 @@ spokes <- function(landscape, coords, loci, maxRadius = ncol(landscape) / 4,
     fromC <- "fromCell" %in% forms
     if (fromC) fromCell <- cellFromXY(landscape, terra::crds(coords))
     toC <- "toCell" %in% forms
-    if (toC) toCell <- cellFromXY(landscape, to[, c("x", "y")])
+    if (toC) toCell <- cellFromXY(landscape, to[, xycolNames])
     land <- "landscape" %in% forms
     listArgs <- if (land) list(landscape = landscape[aCir[, "indices"]][[1]]) else NULL
     if (length(list(...)) > 0) listArgs <- append(listArgs, list(...))
@@ -1084,7 +1102,7 @@ spokes <- function(landscape, coords, loci, maxRadius = ncol(landscape) / 4,
     matrix(rep(t(cc), NROW(bb)), ncol = 2, byrow = TRUE)
   lociAll <- rep(loci, each = NROW(pureCircle2))
   distsAll <- rep(pureCircle2[, "dists"], nrow(bb))
-  dd <- cbind(id = lociAll, dd, indices = cellFromXY(landscape, dd[, c("x", "y")]),
+  dd <- cbind(id = lociAll, dd, indices = cellFromXY(landscape, dd[, xycolNames]),
               dists = distsAll)
 
   dd[!as.logical(dd[, "x"] > terra::xmax(landscape) | dd[, "x"] < terra::xmin(landscape) |

@@ -1,4 +1,6 @@
 library(terra)
+origDTThreads <- data.table::setDTthreads(2L)
+origNcpus <- options(Ncpus = 2L)
 
 # Make random forest cover map
 set.seed(123)
@@ -66,25 +68,23 @@ terra::plot(burnedMap, type = "classes")
 #  passed in to the landscape argument. It won't be exact because the pixel values
 #  will likely not allow it
 stopRule22 <- function(landscape) sum(landscape) > 100
-if (require("CircStats")) {
 
-  set.seed(1234)
-  stopRule1 <- function(landscape) sum(landscape) > 50
-  stopRuleA <- spread(hab, loci = as.integer(sample(1:ncell(hab), 10)), 1, 0, NULL,
-                      maxSize = 1e6, 8, 1e6, id = TRUE, circle = TRUE, stopRule = stopRule1,
-                      stopRuleBehavior = "excludePixel")
-  tapply(hab[], stopRuleA[], sum) # all below 50
+set.seed(1234)
+stopRule1 <- function(landscape) sum(landscape) > 50
+stopRuleA <- spread(hab, loci = as.integer(sample(1:ncell(hab), 10)), 1, 0, NULL,
+                    maxSize = 1e6, 8, 1e6, id = TRUE, circle = TRUE, stopRule = stopRule1,
+                    stopRuleBehavior = "excludePixel")
+tapply(hab[], stopRuleA[], sum) # all below 50
 
-  set.seed(1234)
-  # using stopRuleBehavior = "excludePixel"
-  stopRuleB <- spread(hab, loci = as.integer(sample(1:ncell(hab), 10)), 1, 0, NULL,
-                      maxSize = 1e6, 8, 1e6, id = TRUE, circle = TRUE, stopRule = stopRule22,
-                      stopRuleBehavior = "excludePixel")
-  tapply(hab[], stopRuleB[], sum) # all below 100
+set.seed(1234)
+# using stopRuleBehavior = "excludePixel"
+stopRuleB <- spread(hab, loci = as.integer(sample(1:ncell(hab), 10)), 1, 0, NULL,
+                    maxSize = 1e6, 8, 1e6, id = TRUE, circle = TRUE, stopRule = stopRule22,
+                    stopRuleBehavior = "excludePixel")
+tapply(hab[], stopRuleB[], sum) # all below 100
 
-  if (interactive())
-    terra::plot(c(stopRuleA, stopRuleB))
-}
+if (interactive())
+  terra::plot(c(stopRuleA, stopRuleB))
 # Cellular automata shapes
 # Diamonds - can make them with: a boolean raster, directions = 4,
 #    stopRule in place, spreadProb = 1
@@ -110,13 +110,12 @@ stopRule2 <- function(landscape) sum(landscape) > 200
 seed <- sample(1e4, 1)
 set.seed(seed)
 
-if (require("CircStats")) {
-  circlish <- spread(hab > 0, spreadProb = 1, iterations = 10,
-                     loci = (ncell(hab) - ncol(hab)) / 2 + c(4, -4),
-                     directions = 8, id = TRUE, circle = TRUE)#, stopRule = stopRule2)
-  if (interactive())
-    terra::plot(c(circlish))
-}
+circlish <- spread(hab > 0, spreadProb = 1, iterations = 10,
+                   loci = (ncell(hab) - ncol(hab)) / 2 + c(4, -4),
+                   directions = 8, id = TRUE, circle = TRUE)#, stopRule = stopRule2)
+if (interactive())
+  terra::plot(c(circlish))
+
 set.seed(seed)
 regularCA <- spread(hab > 0, spreadProb = 1, iterations = 10,
                     loci = (ncell(hab) - ncol(hab)) / 2 + c(4, -4),
@@ -136,41 +135,40 @@ endSizes <- seq_along(initialLoci) * 200
 #   variable passed into spread
 stopRule3 <- function(landscape, id, endSizes) sum(landscape) > endSizes[id]
 
-if (require("CircStats")) {
-  set.seed(1)
-  twoCirclesDiffSize <- spread(hab, spreadProb = 1, loci = initialLoci,
-                               circle = TRUE, directions = 8, id = TRUE,
-                               stopRule = stopRule3, endSizes = endSizes,
-                               stopRuleBehavior = "excludePixel")
+set.seed(1)
+twoCirclesDiffSize <- spread(hab, spreadProb = 1, loci = initialLoci,
+                             circle = TRUE, directions = 8, id = TRUE,
+                             stopRule = stopRule3, endSizes = endSizes,
+                             stopRuleBehavior = "excludePixel")
 
-  # or using named list of named elements:
-  set.seed(1)
-  twoCirclesDiffSize2 <- spread(hab, spreadProb = 1, loci = initialLoci,
-                                circle = TRUE, directions = 8, id = TRUE,
-                                stopRule = stopRule3,
-                                vars = list(endSizes = endSizes),
-                                stopRuleBehavior = "excludePixel")
+# or using named list of named elements:
+set.seed(1)
+twoCirclesDiffSize2 <- spread(hab, spreadProb = 1, loci = initialLoci,
+                              circle = TRUE, directions = 8, id = TRUE,
+                              stopRule = stopRule3,
+                              vars = list(endSizes = endSizes),
+                              stopRuleBehavior = "excludePixel")
 
-  compareGeom(twoCirclesDiffSize, twoCirclesDiffSize2, res = TRUE,
-              stopOnError = FALSE)
+compareGeom(twoCirclesDiffSize, twoCirclesDiffSize2, res = TRUE,
+            stopOnError = FALSE)
 
-  terra::plot(c(twoCirclesDiffSize , twoCirclesDiffSize2))
+terra::plot(c(twoCirclesDiffSize , twoCirclesDiffSize2))
 
-  cirs <- values(twoCirclesDiffSize)
-  vals <- tapply(hab[][cirs > 0], cirs[cirs > 0], sum) # one is <200, other is <400 as per endSizes
+cirs <- values(twoCirclesDiffSize)
+vals <- tapply(hab[][cirs > 0], cirs[cirs > 0], sum) # one is <200, other is <400 as per endSizes
 
-  # Stop if sum of landscape is big or mean of quality is too small
-  quality <- rast(hab)
-  quality[] <- runif(ncell(quality), 0, 1)
-  stopRule4 <- function(landscape, quality, cells) {
-    (sum(landscape) > 20) | (mean(values(quality)[cells]) < 0.3)
-  }
-
-  twoCirclesDiffSize <- spread(hab, spreadProb = 1, loci = initialLoci, circle = TRUE,
-                               directions = 8, id = TRUE, stopRule = stopRule4,
-                               quality = quality, stopRuleBehavior = "excludePixel")
-
+# Stop if sum of landscape is big or mean of quality is too small
+quality <- rast(hab)
+quality[] <- runif(ncell(quality), 0, 1)
+stopRule4 <- function(landscape, quality, cells) {
+  (sum(landscape) > 20) | (mean(values(quality)[cells]) < 0.3)
 }
+
+twoCirclesDiffSize <- spread(hab, spreadProb = 1, loci = initialLoci, circle = TRUE,
+                             directions = 8, id = TRUE, stopRule = stopRule4,
+                             quality = quality, stopRuleBehavior = "excludePixel")
+
+
 ## Using alternative algorithm, not probabilistic diffusion
 ## Will give exactly correct sizes, yet still with variability
 ## within the spreading (i.e., cells with and without successes)
@@ -219,3 +217,6 @@ hist(events1[], breaks = 30, main = "Event size distribution") ## TODO: fix this
 #  (randomness may prevent this in all cases)
 sum(hab3[events1[] > 0]) >= sum(hab3[events2[] > 0]) ## should be usually TRUE
 
+# clean up
+data.table::setDTthreads(origDTThreads)
+options(Ncpus = origNcpus)

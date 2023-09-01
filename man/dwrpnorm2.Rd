@@ -15,12 +15,14 @@ dwrpnorm2(theta, mu, rho, sd = 1, acc = 1e-05, tol = acc)
 
 \item{sd}{different way of select rho, see details below.}
 
-\item{acc}{parameter defining the accuracy of the estimation of the density. Terms are added to the infinite summation that defines the density function until successive estimates are within acc of each other.}
+\item{acc}{parameter defining the accuracy of the estimation of the density.
+Terms are added to the infinite summation that defines the density function
+until successive estimates are within acc of each other.}
 
-\item{tol}{the same as acc.}
+\item{tol}{same as \code{acc}.}
 }
 \description{
-This is a modified version of \code{CircStats::dwrpnorm()}.
+This is a modified version of \code{dwrpnorm} in the \code{CircStats} package
 to allow for multiple angles at once (i.e., vectorized on \code{theta} and \code{mu}).
 }
 \examples{
@@ -28,8 +30,14 @@ to allow for multiple angles at once (i.e., vectorized on \code{theta} and \code
 theta <- c(1:500) * 2 * pi / 500
 # Compute wrapped normal density function
 density <- c(1:500)
-for(i in 1:500) density[i] <- dwrpnorm2(theta[i], pi, .75)
-if (interactive()) plot(theta, density)
+for(i in 1:500) {
+  density[i] <- dwrpnorm2(theta[i], pi, .75)
+}
+
+if (interactive()) {
+  plot(theta, density)
+}
+
 # Approximate area under density curve
 sum(density * 2 * pi / 500)
 

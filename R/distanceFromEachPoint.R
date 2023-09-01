@@ -1,7 +1,7 @@
 #' Calculate distances and directions between many points and many grid cells
 #'
 #' This is a modification of [terra::distance()] for the case of many points.
-#' This version can often be faster for a single point because it does not return a RasterLayer.
+#' This version can often be faster for a single point because it does not return a `RasterLayer`.
 #' This is different than [terra::distance()] because it does not take the
 #' minimum distance from the set of points to all cells.
 #' Rather this returns the every pair-wise point distance.
@@ -27,7 +27,7 @@
 #'           x and y, representing x and y coordinates of "to" cells, and
 #'           optional "id" which will be matched with "id" from `from`. Default is all cells.
 #'
-#' @param landscape RasterLayer. optional. This is only used if `to` is NULL, in which case
+#' @param landscape `RasterLayer`. optional. This is only used if `to` is NULL, in which case
 #'                  all cells are considered `to`.
 #'
 #' @param angles Logical. If `TRUE`, then the function will return angles in radians,
@@ -78,8 +78,8 @@
 #' directly by the user.
 #'
 #' This function has the potential to return a very large object, as it is doing pairwise
-#' distances (and optionally directions) between from and to. If there are memory
-#' limitations because there are many
+#' distances (and optionally directions) between from and to.
+#' If there are memory limitations because there are many
 #' `from` and many `to` points, then `cumulativeFn` and `distFn` can be used.
 #' These two functions together will be used iteratively through the `from` points. The
 #' `distFn` should be a transformation of distances to be used by the
@@ -114,9 +114,9 @@ distanceFromEachPoint <- function(from, to = NULL, landscape, angles = NA_real_,
     forms <- names(formals(distFn))
     # browser()
     fromC <- "fromCell" %in% forms
-    if (fromC) fromCell <- cellFromXY(landscape, from[, c("x", "y")])
+    if (fromC) fromCell <- cellFromXY(landscape, from[, xycolNames])
     toC <- "toCells" %in% forms
-    if (toC) toCells <- cellFromXY(landscape, to[, c("x", "y")])
+    if (toC) toCells <- cellFromXY(landscape, to[, xycolNames])
     land <- "landscape" %in% forms
     distFnArgs <- if (land) list(landscape = landscape[]) else list()
     if (length(list(...)) > 0) distFnArgs <- append(distFnArgs, list(...))
@@ -167,7 +167,7 @@ distanceFromEachPoint <- function(from, to = NULL, landscape, angles = NA_real_,
         #                           angles = angles, maxDistance = maxDistance,
         #                           otherFromCols = otherFromCols)
         #     if (toC)
-        #       toCells <- cellFromXY(landscape, out[, c("x", "y")])
+        #       toCells <- cellFromXY(landscape, out[, xycolNames])
         #     if (k == 1) {
         #       if (fromC) distFnArgs <- append(distFnArgs, list(fromCell = fromCell[k]))
         #       if (toC) distFnArgs <- append(distFnArgs, list(toCells = toCells))
@@ -335,8 +335,8 @@ distanceFromEachPoint <- function(from, to = NULL, landscape, angles = NA_real_,
   orig <- order(to[, "id", drop = FALSE], to[, "to", drop = FALSE])
   to <- to[orig, , drop = FALSE]
   angls <- lapply(ids, function(i) {
-    m1 <- to[to[, "id"] == i, c("x", "y"), drop = FALSE]
-    m2 <- from[from[, "id"] == i, c("x", "y"), drop = FALSE]
+    m1 <- to[to[, "id"] == i, xycolNames, drop = FALSE]
+    m2 <- from[from[, "id"] == i, xycolNames, drop = FALSE]
     .pointDirection(m2, m1)
   })
   do.call(rbind, angls)
@@ -386,6 +386,9 @@ distanceFromEachPoint <- function(from, to = NULL, landscape, angles = NA_real_,
 #' @examples
 #' library(terra)
 #'
+#' origDTThreads <- data.table::setDTthreads(2L)
+#' origNcpus <- options(Ncpus = 2L)
+#'
 #' N <- 2
 #' dirRas <- terra::rast(terra::ext(0,40,0,40), res = 1)
 #' coords <- cbind(x = round(runif(N, xmin(dirRas), xmax(dirRas))) + 0.5,
@@ -393,17 +396,23 @@ distanceFromEachPoint <- function(from, to = NULL, landscape, angles = NA_real_,
 #'                 id = 1:N)
 #'
 #' dirs1 <- directionFromEachPoint(from = coords, landscape = dirRas)
-#' if (require("CircStats")) {
-#'   dirs1[, "angles"] <- CircStats::deg(dirs1[,"angles"] %% (2*pi))
-#'   indices <- cellFromXY(dirRas,dirs1[, c("x", "y")])
-#'   minDir <- tapply(dirs1[, "angles"], indices, function(x) min(x)) # minimum angle
-#'   dirRas[] <- as.vector(minDir)
-#'   if (interactive()) {
-#'     terra::plot(dirRas)
-#'     start <- terra::vect(coords[, c("x", "y"), drop = FALSE])
-#'     terra::plot(start, add = TRUE)
-#'   }
+#'
+#' # helper function for converting radians to degrees
+#' deg2 <- function(radian) (radian * 180)/pi
+#' dirs1[, "angles"] <- deg2(dirs1[,"angles"] %% (2*pi))
+#' indices <- cellFromXY(dirRas,dirs1[, c("x", "y")])
+#' minDir <- tapply(dirs1[, "angles"], indices, function(x) min(x)) # minimum angle
+#' dirRas[] <- as.vector(minDir)
+#'
+#' if (interactive()) {
+#'   terra::plot(dirRas)
+#'   start <- terra::vect(coords[, c("x", "y"), drop = FALSE])
+#'   terra::plot(start, add = TRUE)
 #' }
+#'
+#' # clean up
+#' data.table::setDTthreads(origDTThreads)
+#' options(Ncpus = origNcpus)
 #'
 #' @export
 #' @importFrom terra ncell xyFromCell
@@ -508,7 +517,7 @@ outerCumFun <- function(x, from, fromCell, landscape, to, angles, maxDistance, x
                           otherFromCols = otherFromCols)
     if (NROW(out) > 0) {
       if (toC)
-        toCells <- cellFromXY(landscape, out[, c("x", "y")])
+        toCells <- cellFromXY(landscape, out[, xycolNames])
       if (k == 1) {
         if (fromC) distFnArgs <- append(distFnArgs, list(fromCell = fromCell[k]))
         if (toC) distFnArgs <- append(distFnArgs, list(toCells = toCells))
