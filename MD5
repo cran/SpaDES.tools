@@ -1,6 +1,6 @@
-99d270fcbd903d4ad2ec8415d5d6acdd *DESCRIPTION
+0f123dd68eb3b4b7d493c807b087e321 *DESCRIPTION
 36e4b0e49e72fc4240cf05f9a3aa73e2 *NAMESPACE
-475f475aa07adb8374a666ab654bfcb0 *NEWS.md
+cb5bf2d8be9ca930df0cec32f992d79e *NEWS.md
 f2f85b428aa745415b34570ca71d280c *R/RcppExports.R
 5b7d261862e99c16b44816288200919c *R/SELES.R
 bb7f25fd845851e417cd764c9f145e1a *R/distanceFromEachPoint.R
@@ -11,7 +11,7 @@ f2a9e05ffed03bc61781124570ddca2c *R/helpers.R
 94d51316540ae284a6775c3d23210360 *R/mapReduce.R
 2f1567669595704c9e10358422544670 *R/mergeRaster.R
 9d9a574c47cde621184a31050e399dab *R/movement.R
-a664d5e0f33136a5c9e636daea00c4df *R/neighbourhood.R
+117821fbd509855b2fa2c2ca4e5b966d *R/neighbourhood.R
 cfc73a7ac73876fdd103d379ac93f512 *R/numerical-comparisons.R
 e64f1fdcd8397d7b455659fcd1cc146c *R/probability.R
 592e406be7e9cc4b25cf6905d064fa1a *R/resample.R
@@ -61,8 +61,8 @@ e215c60a58265c53c43829bdef04ec8d *inst/extdata/targetCRS.rds
 8369b5fca48b1933820d3866e00825af *man/SELESnumAgents.Rd
 9f60af0da7419fe924f05c78cc454d7c *man/SELESprobInit.Rd
 184d32c129f103b01c562ba34aca8045 *man/SELEStransitions.Rd
-b136dd129fe383e20653d33425bd556c *man/SpaDES.tools-package.Rd
-7fccb57756b1a0a33dff34f28db371ff *man/adj.Rd
+30eb60e6e958b7b8ff78fd0c6f768cba *man/SpaDES.tools-package.Rd
+f803debc96c4b55c3789a1051bd84a57 *man/adj.Rd
 090f7ce9865ed5eed79c0647f15b0c0a *man/cir.Rd
 8f5d6b79909b0b5c1b4f9f53ae993a6c *man/cirSpecialQuick.Rd
 783bf47c18508b922f1fc79a0e4c868a *man/crw.Rd
