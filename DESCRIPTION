@@ -2,7 +2,7 @@ Type: Package
 Package: SpaDES.tools
 Title: Additional Tools for Developing Spatially Explicit Discrete
         Event Simulation (SpaDES) Models
-Version: 2.0.8
+Version: 2.0.9
 Date: 2025-10-10
 Authors@R: c(
     person("Eliot J B", "McIntire", , "eliot.mcintire@nrcan-rncan.gc.ca", role = "aut",
@@ -52,7 +52,7 @@ Collate: 'RcppExports.R' 'heading.R' 'SELES.R'
         'splitRaster.R' 'spread.R' 'spread2.R' 'spread3.R'
         'studyArea.R' 'zzz.R'
 NeedsCompilation: yes
-Packaged: 2025-10-10 20:36:03 UTC; achubaty
+Packaged: 2025-10-13 16:19:20 UTC; achubaty
 Author: Eliot J B McIntire [aut] (ORCID:
     <https://orcid.org/0000-0002-6914-8316>),
   Alex M Chubaty [aut, cre] (ORCID:
@@ -65,4 +65,4 @@ Author: Eliot J B McIntire [aut] (ORCID:
     of Natural Resources Canada [cph]
 Maintainer: Alex M Chubaty <achubaty@for-cast.ca>
 Repository: CRAN
-Date/Publication: 2025-10-11 05:10:09 UTC
+Date/Publication: 2025-10-14 05:10:47 UTC
