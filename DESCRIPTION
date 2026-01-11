@@ -2,8 +2,8 @@ Type: Package
 Package: SpaDES.tools
 Title: Additional Tools for Developing Spatially Explicit Discrete
         Event Simulation (SpaDES) Models
-Version: 2.0.9
-Date: 2025-10-10
+Version: 2.1.1
+Date: 2026-01-09
 Authors@R: c(
     person("Eliot J B", "McIntire", , "eliot.mcintire@nrcan-rncan.gc.ca", role = "aut",
            comment = c(ORCID = "0000-0002-6914-8316")),
@@ -31,7 +31,7 @@ BugReports: https://github.com/PredictiveEcology/SpaDES.tools/issues
 Depends: R (>= 4.3)
 Imports: backports, checkmate (>= 1.8.2), data.table (>= 1.10.4),
         fpCompare (>= 0.2.1), graphics, methods, parallel, Rcpp (>=
-        0.12.12), reproducible (>= 2.0.9), stats, terra
+        0.12.12), reproducible (>= 2.1.3), stats, terra
 Suggests: animation, bit (>= 1.1-12), covr, DEoptim (>= 2.2-4), dqrng,
         fastmatch, knitr, NLMR (>= 1.1.1), quickPlot (>= 1.0.2), raster
         (>= 2.5-8), rmarkdown, sf, snow, sp (>= 1.2-4), testthat (>=
@@ -47,12 +47,11 @@ Collate: 'RcppExports.R' 'heading.R' 'SELES.R'
         'distanceFromEachPoint.R' 'environment.R' 'helpers.R'
         'initialize.R' 'mapReduce.R' 'mergeRaster.R' 'movement.R'
         'neighbourhood.R' 'numerical-comparisons.R' 'probability.R'
-        'reexports.R' 'resample.R' 'rings.R'
-        'spades-tools-deprecated.R' 'spades-tools-package.R'
-        'splitRaster.R' 'spread.R' 'spread2.R' 'spread3.R'
-        'studyArea.R' 'zzz.R'
+        'resample.R' 'rings.R' 'spades-tools-deprecated.R'
+        'spades-tools-package.R' 'splitRaster.R' 'spread.R' 'spread2.R'
+        'spread3.R' 'studyArea.R' 'zzz.R'
 NeedsCompilation: yes
-Packaged: 2025-10-13 16:19:20 UTC; achubaty
+Packaged: 2026-01-09 18:37:29 UTC; achubaty
 Author: Eliot J B McIntire [aut] (ORCID:
     <https://orcid.org/0000-0002-6914-8316>),
   Alex M Chubaty [aut, cre] (ORCID:
@@ -65,4 +64,4 @@ Author: Eliot J B McIntire [aut] (ORCID:
     of Natural Resources Canada [cph]
 Maintainer: Alex M Chubaty <achubaty@for-cast.ca>
 Repository: CRAN
-Date/Publication: 2025-10-14 05:10:47 UTC
+Date/Publication: 2026-01-11 06:11:56 UTC
